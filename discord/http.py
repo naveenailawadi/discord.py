@@ -38,6 +38,7 @@ from . import __version__, utils
 
 log = logging.getLogger(__name__)
 
+
 async def json_or_text(response):
     text = await response.text(encoding='utf-8')
     try:
@@ -48,6 +49,7 @@ async def json_or_text(response):
         pass
 
     return text
+
 
 class Route:
     BASE = 'https://discord.com/api/v7'
@@ -70,6 +72,7 @@ class Route:
         # the bucket is just method + path w/ major parameters
         return '{0.channel_id}:{0.guild_id}:{0.path}'.format(self)
 
+
 class MaybeUnlock:
     def __init__(self, lock):
         self.lock = lock
@@ -85,6 +88,7 @@ class MaybeUnlock:
         if self._unlock:
             self.lock.release()
 
+
 class HTTPClient:
     """Represents an HTTP client sending HTTP requests to the Discord API."""
 
@@ -94,7 +98,7 @@ class HTTPClient:
     def __init__(self, connector=None, *, proxy=None, proxy_auth=None, loop=None, unsync_clock=True):
         self.loop = asyncio.get_event_loop() if loop is None else loop
         self.connector = connector
-        self.__session = None # filled in static_login
+        self.__session = None  # filled in static_login
         self._locks = weakref.WeakValueDictionary()
         self._global_over = asyncio.Event()
         self._global_over.set()
@@ -414,7 +418,7 @@ class HTTPClient:
 
     def clear_single_reaction(self, channel_id, message_id, emoji):
         r = Route('DELETE', '/channels/{channel_id}/messages/{message_id}/reactions/{emoji}',
-                   channel_id=channel_id, message_id=message_id, emoji=emoji)
+                  channel_id=channel_id, message_id=message_id, emoji=emoji)
         return self.request(r)
 
     def get_message(self, channel_id, message_id):
@@ -663,9 +667,9 @@ class HTTPClient:
         params = {
             'days': days,
             'compute_prune_count': 'true' if compute_prune_count else 'false',
-            'include_roles': roles
+            'include_roles': json.dumps(roles)
         }
-        return self.request(Route('POST', '/guilds/{guild_id}/prune', guild_id=guild_id), params=params, reason=reason)
+        return self.request(Route('POST', '/guilds/{guild_id}/prune', guild_id=guild_id), params=json.dumps(params), reason=reason)
 
     def estimate_pruned_members(self, guild_id, days):
         params = {
